@@ -15,7 +15,8 @@ vars = { ENVIRONMENT = "production" }
 [[d1_databases]]
 binding = "DB"
 database_name = "webhook-relay-db"
-database_id = "placeholder-will-be-replaced"
+database_id = "replace-with-prod-d1-id"
+preview_database_id = "replace-with-dev-d1-id"
 
 # Queues
 [[queues.producers]]
@@ -35,4 +36,5 @@ bucket_name = "webhook-payloads"
 # KV Namespace (for caching and rate limiting)
 [[kv_namespaces]]
 binding = "CACHE"
-id = "placeholder-will-be-replaced"
+id = "replace-with-prod-kv-id"
+preview_id = "replace-with-dev-kv-id"
