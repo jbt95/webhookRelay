@@ -133,9 +133,10 @@ export const deliveryConsumer = {
 
         if (!integration || !integration.isActive) {
           console.warn(`Integration ${webhook.integrationId} not found or inactive`);
+          const failureTimestamp = new Date().toISOString();
           await db
             .update(schema.webhooks)
-            .set({ status: 'failed' })
+            .set({ status: 'failed', failedAt: failureTimestamp })
             .where(eq(schema.webhooks.id, webhookId));
           message.ack();
           continue;
@@ -170,6 +171,8 @@ export const deliveryConsumer = {
         const maxAttempts = policy.maxAttempts ?? 5;
         const delayMs = nextDelayMs(attempt + 1, integration.retryPolicy);
         const canRetry = outcome.status === 'retryable' && attempt < maxAttempts;
+        const failedAt =
+          !canRetry && outcome.status !== 'delivered' ? new Date().toISOString() : undefined;
 
         await db.insert(schema.deliveryAttempts).values({
           id: crypto.randomUUID(),
@@ -195,8 +198,12 @@ export const deliveryConsumer = {
         if (!canRetry) {
           await db
             .update(schema.webhooks)
-            .set({ status: 'failed' })
+            .set({ status: 'failed', failedAt: new Date().toISOString() })
             .where(eq(schema.webhooks.id, webhookId));
+          console.warn(
+            `Webhook ${webhookId} failed after ${attempt} attempts`,
+            outcome.errorMessage ?? 'max attempts reached'
+          );
           message.ack();
           continue;
         }

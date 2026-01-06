@@ -62,6 +62,7 @@ export const webhooks = sqliteTable(
       .notNull()
       .default(sql`(datetime('now'))`),
     status: text('status').notNull().default('pending'),
+    failedAt: text('failed_at'),
   },
   (table) => ({
     integrationStatusIdx: index('idx_webhooks_integration_status').on(
@@ -74,6 +75,7 @@ export const webhooks = sqliteTable(
       table.receivedAt
     ),
     receivedAtIdx: index('idx_webhooks_received').on(table.receivedAt),
+    failedAtIdx: index('idx_webhooks_failed_at').on(table.failedAt),
     idempotencyIdx: uniqueIndex('idx_webhooks_idempotency').on(
       table.integrationId,
       table.idempotencyKey
