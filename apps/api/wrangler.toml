@@ -1,0 +1,38 @@
+name = "webhook-relay-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Development
+[env.development]
+vars = { ENVIRONMENT = "development" }
+
+# Production
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "webhook-relay-db"
+database_id = "placeholder-will-be-replaced"
+
+# Queues
+[[queues.producers]]
+binding = "DELIVERY_QUEUE"
+queue = "webhook-delivery"
+
+[[queues.consumers]]
+queue = "webhook-delivery"
+max_batch_size = 10
+max_batch_timeout = 5
+
+# R2 Bucket (for large payloads)
+[[r2_buckets]]
+binding = "PAYLOADS"
+bucket_name = "webhook-payloads"
+
+# KV Namespace (for caching and rate limiting)
+[[kv_namespaces]]
+binding = "CACHE"
+id = "placeholder-will-be-replaced"
