@@ -17,6 +17,35 @@ const parseHeaders = (raw: string | null): Record<string, string> => {
   }
 };
 
+const exponentialBackoff = (attempt: number, initialMs: number, maxMs: number): number => {
+  const delay = Math.min(initialMs * 2 ** Math.max(attempt - 1, 0), maxMs);
+  return delay;
+};
+
+const applyJitter = (delayMs: number, jitterRatio = 0.3): number => {
+  const jitter = delayMs * jitterRatio;
+  const min = delayMs - jitter;
+  const max = delayMs + jitter;
+  return Math.max(0, min + Math.random() * (max - min));
+};
+
+const nextDelayMs = (attempt: number, retryPolicyJson: string | null): number => {
+  if (!retryPolicyJson) return applyJitter(exponentialBackoff(attempt, 1000, 16000));
+  try {
+    const policy = JSON.parse(retryPolicyJson) as {
+      maxAttempts?: number;
+      initialDelayMs?: number;
+      maxDelayMs?: number;
+    };
+    const initial = policy.initialDelayMs ?? 1000;
+    const max = policy.maxDelayMs ?? 16000;
+    return applyJitter(exponentialBackoff(attempt, initial, max));
+  } catch (error) {
+    console.warn('Failed to parse retry policy, using defaults', error);
+    return applyJitter(exponentialBackoff(attempt, 1000, 16000));
+  }
+};
+
 const forwardWithTimeout = async (
   targetUrl: string,
   payload: string,
@@ -126,6 +155,22 @@ export const deliveryConsumer = {
 
         const outcome = classifyOutcome({ response, error, timedOut });
 
+        const policy = (() => {
+          try {
+            return JSON.parse(integration.retryPolicy) as {
+              maxAttempts?: number;
+              initialDelayMs?: number;
+              maxDelayMs?: number;
+            };
+          } catch {
+            return {} as Record<string, never>;
+          }
+        })();
+
+        const maxAttempts = policy.maxAttempts ?? 5;
+        const delayMs = nextDelayMs(attempt + 1, integration.retryPolicy);
+        const canRetry = outcome.status === 'retryable' && attempt < maxAttempts;
+
         await db.insert(schema.deliveryAttempts).values({
           id: crypto.randomUUID(),
           webhookId,
@@ -147,7 +192,7 @@ export const deliveryConsumer = {
           continue;
         }
 
-        if (outcome.status === 'failed') {
+        if (!canRetry) {
           await db
             .update(schema.webhooks)
             .set({ status: 'failed' })
@@ -156,12 +201,12 @@ export const deliveryConsumer = {
           continue;
         }
 
-        // Retryable path
         await db
           .update(schema.webhooks)
           .set({ status: 'pending' })
           .where(eq(schema.webhooks.id, webhookId));
-        message.retry();
+
+        await message.retry({ delaySeconds: Math.ceil(delayMs / 1000) });
       } catch (error) {
         console.error(`Failed to process webhook ${webhookId}:`, error);
         await db
