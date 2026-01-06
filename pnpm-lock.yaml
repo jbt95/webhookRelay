@@ -26,6 +26,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@webhook-relay/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@webhook-relay/shared':
         specifier: workspace:*
         version: link:../../packages/shared

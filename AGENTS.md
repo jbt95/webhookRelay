@@ -8,6 +8,8 @@
 - Slice work vertically end-to-end; keep changes small and incremental to reduce risk.
 - Apply SOLID with emphasis on Dependency Inversion; depend on abstractions and domain contracts.
 - Prefer tell-don't-ask and functional-style composition; avoid shared mutable state and side effects when possible.
+- When consuming internal packages, depend on them via workspace/package manager (no path aliases); expose proper exports instead of TS path hacks.
+- Favor functional pipelines/monads over imperative branching; prefer declarative control flow.
 - Keep code clean: small functions/modules, clear naming, no dead code, and minimal feature flags.
 
 ## Type Safety
