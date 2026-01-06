@@ -13,6 +13,11 @@ export interface Env {
 
   // KV Namespace
   CACHE: KVNamespace;
+
+  // Auth
+  CLERK_ISSUER: string;
+  CLERK_AUDIENCE: string;
+  CLERK_JWKS_URL: string;
 }
 
 export interface DeliveryMessage {

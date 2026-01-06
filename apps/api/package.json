@@ -20,6 +20,7 @@
     "@webhook-relay/shared": "workspace:*",
     "drizzle-orm": "^0.38.0",
     "hono": "^4.6.0",
+    "jose": "^5.9.3",
     "ulid": "^2.3.0",
     "zod": "^3.24.0"
   },

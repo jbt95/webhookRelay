@@ -67,6 +67,14 @@ Environment bindings expected by the Worker:
 - `DELIVERY_QUEUE` (Queues binding for webhook delivery)
 - `PAYLOADS` (R2 bucket binding for large payloads)
 - `CACHE` (KV namespace binding for caching/rate limiting)
+- `CLERK_JWKS_URL` (Clerk JWKS endpoint for JWT verification)
+- `CLERK_ISSUER` (Clerk issuer expected in JWTs)
+- `CLERK_AUDIENCE` (Clerk audience expected in JWTs)
+
+Frontend environment variables:
+
+- `VITE_CLERK_PUBLISHABLE_KEY` (Clerk publishable key)
+- `VITE_API_BASE_URL` (optional: override API base, defaults to `/api`)
 
 ### 3. Run migrations
 

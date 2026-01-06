@@ -11,6 +11,9 @@
     "lint": "eslint src --ext .ts,.tsx"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.9.1",
+    "@clerk/shared": "^2.21.1",
+    "@clerk/types": "^4.36.1",
     "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.1",
     "@webhook-relay/shared": "workspace:*",

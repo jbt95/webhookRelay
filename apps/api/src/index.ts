@@ -6,6 +6,7 @@ import { ingressRoutes } from './routes/ingress';
 import { integrationsRoutes } from './routes/integrations';
 import { webhooksRoutes } from './routes/webhooks';
 import { healthRoutes } from './routes/health';
+import { requireAuth } from './middleware/auth';
 import type { Env } from './types';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -32,6 +33,7 @@ app.route('/health', healthRoutes);
 app.route('/v1/webhooks/in', ingressRoutes);
 
 // API routes (authenticated)
+app.use('/v1/*', requireAuth);
 app.route('/v1/integrations', integrationsRoutes);
 app.route('/v1/webhooks', webhooksRoutes);
 
