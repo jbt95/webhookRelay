@@ -29,7 +29,9 @@ export const CreateIntegrationSchema = z.object({
 });
 export type CreateIntegration = z.infer<typeof CreateIntegrationSchema>;
 
-export const UpdateIntegrationSchema = CreateIntegrationSchema.partial();
+export const UpdateIntegrationSchema = CreateIntegrationSchema.partial().extend({
+  isActive: z.boolean().optional(),
+});
 export type UpdateIntegration = z.infer<typeof UpdateIntegrationSchema>;
 
 // Integration entity
